@@ -154,6 +154,26 @@ def run(args):
     command = qemu_command(args, arch, device, img_path)
 
     logging.info("Command: " + " ".join(command))
+
+    if args.image_size:
+        img_size = args.image_size
+        logging.info("Increasing the system image size by " + img_size)
+        pmb.helpers.run.root(args, ["truncate", "-s", "+" + img_size, img_path])
+
+        new_img_size = os.path.getsize(img_path)
+        new_img_size_m = new_img_size / 1024 / 1024
+        new_img_size_g = new_img_size_m / 1024
+
+        if new_img_size_g >= 1:
+            new_img_size_text = str(round(new_img_size_g, 2)) + "G"
+        else:
+            new_img_size_text = str(round(new_img_size_m)) + "M"
+
+        logging.info(os.path.basename(img_path) + " is now " + new_img_size_text)
+    else:
+        logging.info("NOTE: Run 'pmbootstrap qemu --image-size 200M' to increase"
+                     " the system image size when you run out of space!")
+
     print()
     logging.info("You can connect to the Virtual Machine using the"
                  " following services:")
